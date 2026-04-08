@@ -93,6 +93,16 @@ function createScene() {
     camera.lowerBetaLimit = 0.01;
     camera.upperBetaLimit = Math.PI - 0.01;
 
+    // Prevent page scroll
+    let isHovering = false;
+    canvas.addEventListener("pointerenter", () => isHovering = true);
+    canvas.addEventListener("pointerleave", () => isHovering = false);
+    canvas.addEventListener("wheel", (e) => {
+        if (isHovering) {
+            e.preventDefault();   
+        }
+    }, { passive: false });
+
 // TEXT SYSTEM
 
     const TEXT_ITEMS = [
