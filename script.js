@@ -142,9 +142,9 @@ function createScene() {
     
     const MODELS = [
         "https://raw.githubusercontent.com/dezz46/WebGl-assets/main/LOU_model_babylon.glb",
+        "https://raw.githubusercontent.com/dezz46/WebGl-assets/main/KitchenSink.glb",
         "https://raw.githubusercontent.com/dezz46/WebGl-assets/main/TT_Sofa_model.glb",
-        "https://raw.githubusercontent.com/dezz46/WebGl-assets/main/TT_Shelf.glb",
-        "https://raw.githubusercontent.com/dezz46/WebGl-assets/main/KitchenSink.glb"
+        "https://raw.githubusercontent.com/dezz46/WebGl-assets/main/TT_Shelf.glb"
     ];
 
     // UI BUTTON
