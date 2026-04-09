@@ -226,7 +226,7 @@ function createScene() {
         scene
     );
 
-    scene.environmentIntensity = 1.5;
+    scene.environmentIntensity = 1.8;
 
     scene.imageProcessingConfiguration.toneMappingEnabled = true;
     scene.imageProcessingConfiguration.toneMappingType =
