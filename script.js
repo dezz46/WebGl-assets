@@ -6,68 +6,184 @@ function createScene() {
 
     const scene = new BABYLON.Scene(engine);
 
+// 🔥 LOADING UI
+
+    const loadingUI = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("loadingUI");
+
+    const container = new BABYLON.GUI.StackPanel();
+    container.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_CENTER;
+
+    loadingUI.addControl(container);
+
+    // ROTATING ICON
+    const loaderIcon = new BABYLON.GUI.Image(
+      "loaderIcon",
+        "https://raw.githubusercontent.com/dezz46/WebGl-assets/main/Qrotate.png"
+    );
+    loaderIcon.width = "300px";
+    loaderIcon.height = "243px";
+    loaderIcon.alpha = 0;
+
+    container.addControl(loaderIcon);
+    container.isVertical = true;
+    container.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
+
+    // TEXT
+    const loaderText = new BABYLON.GUI.Image(
+        "loaderText",
+        "https://raw.githubusercontent.com/dezz46/WebGl-assets/main/loading.png"
+    );
+    loaderText.width = "300px";
+    loaderText.height = "220px";
+    loaderText.alpha = 0;
+
+    container.addControl(loaderText);
+    container.isVertical = true;
+    container.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
+
+    //intro loading
+    function introLoadingAnim() {
+
+    [loaderIcon, loaderText].forEach(el => {
+
+        el.scaleX = 1;
+        el.scaleY = 1;
+
+        BABYLON.Animation.CreateAndStartAnimation(
+            "fadeIn",
+            el,
+            "alpha",
+            60,
+            30,
+            0,
+            1
+        );
+
+        BABYLON.Animation.CreateAndStartAnimation(
+            "scaleIn",
+            el,
+            "scaleX",
+            60,
+            30,
+            0.8,
+            1
+        );
+
+        BABYLON.Animation.CreateAndStartAnimation(
+            "scaleInY",
+            el,
+            "scaleY",
+            60,
+            30,
+            0.8,
+            1
+        );
+    });
+    }
+
+    loaderIcon.alpha = 1;
+    loaderText.alpha = 1;
+
+    loadingUI.isForeground = true;
+
+    //rotationloop
+    scene.registerBeforeRender(() => {
+    loaderIcon.rotation += 0.05;
+    });
+
+    //exitanim
+    function exitLoadingAnim(callback) {
+
+    [loaderIcon, loaderText].forEach(el => {
+
+        BABYLON.Animation.CreateAndStartAnimation(
+            "fadeOut",
+            el,
+            "alpha",
+            60,
+            30,
+            1,
+            0
+        );
+
+        BABYLON.Animation.CreateAndStartAnimation(
+            "scaleOut",
+            el,
+            "scaleX",
+            60,
+            30,
+            1,
+            1.3
+        );
+
+        BABYLON.Animation.CreateAndStartAnimation(
+            "scaleOutY",
+            el,
+            "scaleY",
+            60,
+            30,
+            1,
+            1.3
+        );
+    });
+
+    setTimeout(() => {
+        loadingUI.dispose();
+        callback();
+    }, 500);
+    }
+
+    
+
+
 // STATE
     let modelIndex = 0;
     let currentModel = null;
     
     const MODELS = [
         "https://raw.githubusercontent.com/dezz46/WebGl-assets/main/LOU_model_babylon.glb",
-        "https://raw.githubusercontent.com/dezz46/WebGl-assets/main/TT_Sofa_model.glb"
+        "https://raw.githubusercontent.com/dezz46/WebGl-assets/main/TT_Sofa_model.glb",
+        "https://raw.githubusercontent.com/dezz46/WebGl-assets/main/TT_Shelf.glb",
+        "https://raw.githubusercontent.com/dezz46/WebGl-assets/main/KitchenSink.glb"
     ];
 
-// UI BUTTON
+    // UI BUTTON
 
-    const gui = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
-    gui.isPointerBlocker = false;
+    function createArrow(direction = "left") {
 
-    const button = new BABYLON.GUI.Ellipse();
-    button.width = "100px";
-    button.height = "100px";
-    button.background = "black";
-    button.thickness = 0;
-    button.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
-    button.top = "60px";
-    button.isPointerBlocker = true;
-
-    gui.addControl(button);
-
-    const icon = new BABYLON.GUI.Image(
-        "icon",
-        "https://img.icons8.com/ios-filled/100/ffffff/change.png"
-    );
-    icon.width = "50px";
-    icon.height = "60px";
-
-    button.addControl(icon);
-
-    button.onPointerEnterObservable.add(() => {
-        button.scaleX = 1.1;
-        button.scaleY = 1.1;
-    });
-
-    button.onPointerOutObservable.add(() => {
-        button.scaleX = 1;
-        button.scaleY = 1;
-    });
-
-    button.onPointerUpObservable.add(() => {
-
-    if (!currentModel) return;
-
-    // 🔥 morph
-    morphModel();
-
-
-    });
-
-// FONT
-
-    const font = new FontFace(
-        "Bauhaus",
-        "url(https://static.wfonts.com/data/2016/05/19/bauhaus-bold/bauhaub.ttf)"
+    const arrow = new BABYLON.GUI.Image(
+        "arrow",
+        "https://raw.githubusercontent.com/dezz46/WebGl-assets/main/rightArrow.png"
     );
 
-    font.load().then(() => document.fonts.add(font));
+    arrow.width = "120px";
+    arrow.height = "300px";
+
+    // flip for left
+    if (direction === "left") {
+        arrow.rotation = Math.PI; //  flip
+    }
+
+    arrow.alpha = 0.5; // 👈 key for "behind feel"
+
+    // hover
+    arrow.onPointerEnterObservable.add(() => {
+        arrow.scaleX = 1.2;
+        arrow.scaleY = 1; // only horizontal stretch
+        arrow.alpha = 1;
+    });
+
+    arrow.onPointerOutObservable.add(() => {
+        arrow.scaleX = 1;
+        arrow.scaleY = 1;
+        arrow.alpha = 0.5;
+    });
+
+    arrow.isPointerBlocker = true;
+
+    return arrow;
+    }
+    
 
 // SCENE + CAMERA
 
@@ -103,123 +219,6 @@ function createScene() {
         }
     }, { passive: false });
 
-// TEXT SYSTEM
-
-    const TEXT_ITEMS = [
-        "3d product","archviz","VR","digital twins","AR",
-        "3d render","3d modeling","ad creatives","hero shots",
-        "commercial ads","social media ads","configurator",
-        "cgi","animation","virtual showroom","interactive"
-    ];
-
-    const textMeshes = [];
-
-    function createTextMesh(text) {
-
-        const texture = new BABYLON.DynamicTexture("dt", { width: 1024, height: 256 }, scene);
-        const ctx = texture.getContext();
-
-        function draw(highlight = false) {
-            ctx.clearRect(0, 0, 1024, 256);
-
-            ctx.font = "bold 120px Bauhaus";
-            ctx.lineWidth = 1;
-
-            if (highlight) {
-                ctx.fillStyle = "black";
-                ctx.fillText(text, 50, 150);
-            } else {
-                ctx.strokeStyle = "black";
-                ctx.strokeText(text, 50, 150);
-            }
-
-            texture.update();
-        }
-
-        draw(false);
-
-        const mat = new BABYLON.StandardMaterial("mat", scene);
-        mat.diffuseTexture = texture;
-        mat.emissiveTexture = texture;
-        mat.opacityTexture = texture;
-        mat.backFaceCulling = false;
-
-        const plane = BABYLON.MeshBuilder.CreatePlane("text", {
-            width: 3,
-            height: 0.8
-        }, scene);
-
-        plane.material = mat;
-
-        plane.metadata = {
-            isText: true,
-            draw: draw,
-            highlighted: false,
-            baseY: 0,
-            floatOffset: Math.random() * 10
-        };
-
-        return plane;
-    }
-
-    // DISTRIBUTION
-    const COLS = 15;
-    const ROWS = 8;
-    const RADIUS = 8;
-    const HEIGHT = 6;
-
-    let positions = [];
-
-    for (let r = 0; r < ROWS; r++) {
-        for (let c = 0; c < COLS; c++) {
-            const offset = (r % 2 === 0) ? 0 : (0.5 / COLS);
-            const angle = ((c / COLS) + offset) * Math.PI * 2;
-            const y = (r / (ROWS - 1) - 0.5) * HEIGHT;
-
-            positions.push({ angle, y });
-        }
-    }
-
-    positions.sort(() => Math.random() - 0.5);
-
-    positions.forEach((pos, i) => {
-
-        const mesh = createTextMesh(TEXT_ITEMS[i % TEXT_ITEMS.length]);
-
-        mesh.position.x = Math.cos(pos.angle) * RADIUS;
-        mesh.position.z = Math.sin(pos.angle) * RADIUS;
-        mesh.position.y = pos.y;
-
-        mesh.metadata.baseY = mesh.position.y;
-
-        textMeshes.push(mesh);
-    });
-
-    scene.registerBeforeRender(() => {
-
-        const time = performance.now() * 0.0003;
-
-        textMeshes.forEach(m => {
-            m.lookAt(camera.position);
-            m.rotate(BABYLON.Axis.Y, Math.PI);
-
-            m.position.y = m.metadata.baseY +
-                Math.sin(time + m.metadata.floatOffset) * 0.05;
-        });
-    });
-
-    // 🔥 FIXED HIGHLIGHT SYSTEM
-    setInterval(() => {
-
-        textMeshes.forEach(m => m.metadata.draw(false));
-
-        for (let i = 0; i < 5; i++) {
-            const m = textMeshes[Math.floor(Math.random() * textMeshes.length)];
-            m.metadata.draw(true);
-        }
-
-    }, 5000);
-
 // LIGHTING
 
     scene.environmentTexture = BABYLON.CubeTexture.CreateFromPrefilteredData(
@@ -236,49 +235,127 @@ function createScene() {
     scene.imageProcessingConfiguration.exposure = 1.2;
     scene.imageProcessingConfiguration.contrast = 1.2;
 
-// MODEL LOAD
+// =======================
+// 🔥 PRELOAD SYSTEM
+// =======================
 
-    BABYLON.SceneLoader.ImportMesh("", "", MODELS[0], scene, function(meshes) {
+const loadedModels = [];
+let loadedCount = 0;
 
-    currentModel = new BABYLON.TransformNode("modelRoot", scene);
+introLoadingAnim();
 
-    meshes.forEach(m => {
-        if (m.name !== "__root__") {
-            m.parent = currentModel;
-        }
+setTimeout(() => {
+
+    MODELS.forEach((url, index) => {
+
+        BABYLON.SceneLoader.ImportMesh("", "", url, scene, function(meshes) {
+
+            const root = new BABYLON.TransformNode("model_" + index, scene);
+
+            meshes.forEach(m => {
+                if (m.name !== "__root__") {
+                    m.parent = root;
+                }
+            });
+
+            root.setEnabled(false);
+            loadedModels[index] = root;
+
+            loadedCount++;
+
+            if (loadedCount === MODELS.length) {
+                onAllModelsLoaded();
+            }
+        });
     });
+}, 100);
 
-    // 🔥 NORMALIZE POSITION
-    const bounds = currentModel.getHierarchyBoundingVectors(true);
-    const center = bounds.min.add(bounds.max).scale(0.5);
-    const size = bounds.max.subtract(bounds.min).length();
 
-    currentModel.position.copyFrom(center);
+// =======================
+// 🔥 FIRST MODEL AFTER LOAD
+// =======================
 
-    // camera setup
-    camera.target = center.add(new BABYLON.Vector3(0,size * 0.4, 0));
-    camera.radius = size * 1.5;
+function onAllModelsLoaded() {
 
-    camera.lowerRadiusLimit = size * 0.8;
-    camera.upperRadiusLimit = size * 3;
-    camera.wheelPrecision = 100 / size;
-    camera.minZ = size * 0.01;
+    exitLoadingAnim(() => {
+
+
+        // --- GUI ROOT ---
+    const gui = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+    gui.isForeground = true; // keep UI active
+
+    // LEFT
+    const leftArrow = createArrow("left");
+    leftArrow.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+    leftArrow.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_CENTER;
+    leftArrow.left = "40px";
+
+    gui.addControl(leftArrow);
+
+    // RIGHT
+    const rightArrow = createArrow("right");
+    rightArrow.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
+    rightArrow.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_CENTER;
+    rightArrow.left = "-40px";
+
+    gui.addControl(rightArrow);
+
+    // --- CLICK EVENTS ---
+    leftArrow.onPointerUpObservable.add(() => morphModel(-1));
+    rightArrow.onPointerUpObservable.add(() => morphModel(1));
+    
+// FONT
+
+    const font = new FontFace(
+        "Bauhaus",
+        "url(https://static.wfonts.com/data/2016/05/19/bauhaus-bold/bauhaub.ttf)"
+    );
+
+    font.load().then(() => document.fonts.add(font));
+
+        currentModel = loadedModels[0];
+        currentModel.setEnabled(true);
+
+        const bounds = currentModel.getHierarchyBoundingVectors(true);
+        const center = bounds.min.add(bounds.max).scale(0.5);
+        const size = bounds.max.subtract(bounds.min).length();
+
+        currentModel.position.copyFrom(center);
+
+        camera.target = center.add(new BABYLON.Vector3(0, size * 0.4, 0));
+        camera.radius = size * 1.5;
+
+        camera.lowerRadiusLimit = size * 0.8;
+        camera.upperRadiusLimit = size * 3;
+        camera.wheelPrecision = 100 / size;
+        camera.minZ = size * 0.01;
+
     });
+}
 
-    let isMorphing = false;
 
-    function morphModel() {
+// =======================
+// 🔥 MORPH MODEL (PRELOADED)
+// =======================
+
+let isMorphing = false;
+
+function morphModel(direction = 1) {
 
     if (!currentModel || isMorphing) return;
     isMorphing = true;
 
     const oldModel = currentModel;
 
-    // 🔁 next model FIRST
-    modelIndex = (modelIndex + 1) % MODELS.length;
+    // 🔁 LOOP INDEX
+    modelIndex += direction;
+    if (modelIndex >= loadedModels.length) modelIndex = 0;
+    if (modelIndex < 0) modelIndex = loadedModels.length - 1;
+
+    const newModel = loadedModels[modelIndex];
 
     // -----------------------
-    // 🔧 EASING FUNCTIONS
+    // 🔧 EASING
     // -----------------------
     const easeIn = new BABYLON.CubicEase();
     easeIn.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEIN);
@@ -287,7 +364,7 @@ function createScene() {
     easeOut.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEOUT);
 
     // -----------------------
-    // 🔥 PHASE 1 — ACCELERATE OUT
+    // 🔥 ROTATE OUT
     // -----------------------
     const animOut = new BABYLON.Animation(
         "rotateOut",
@@ -299,7 +376,7 @@ function createScene() {
 
     animOut.setKeys([
         { frame: 0, value: oldModel.rotation.y },
-        { frame: 20, value: oldModel.rotation.y + Math.PI * 2 } // fast spin
+        { frame: 20, value: oldModel.rotation.y + Math.PI * 2 }
     ]);
 
     animOut.setEasingFunction(easeIn);
@@ -308,73 +385,64 @@ function createScene() {
 
     scene.beginAnimation(oldModel, 0, 20, false, 1, () => {
 
+        oldModel.setEnabled(false);
+
+        // 🔥 ACTIVATE NEW MODEL
+        currentModel = newModel;
+        currentModel.setEnabled(true);
+
+        // 🔥 RECENTER CAMERA (important)
+        const bounds = currentModel.getHierarchyBoundingVectors(true);
+        const center = bounds.min.add(bounds.max).scale(0.5);
+        const size = bounds.max.subtract(bounds.min).length();
+
+        currentModel.position.copyFrom(center);
+
+        camera.target = center.add(new BABYLON.Vector3(0, size * 0.4, 0));
+        camera.radius = size * 1.5;
+
         // -----------------------
-        // 🔥 SWITCH MODEL
+        // 🔥 ROTATE IN
         // -----------------------
-        oldModel.getChildMeshes().forEach(m => m.dispose());
-        oldModel.dispose();
+        const fastSpin = new BABYLON.Animation(
+            "spinIn",
+            "rotation.y",
+            60,
+            BABYLON.Animation.ANIMATIONTYPE_FLOAT,
+            BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT
+        );
 
-        BABYLON.SceneLoader.ImportMesh("", "", MODELS[modelIndex], scene, function(meshes) {
+        fastSpin.setKeys([
+            { frame: 0, value: currentModel.rotation.y },
+            { frame: 15, value: currentModel.rotation.y + Math.PI * 2 }
+        ]);
 
-            currentModel = new BABYLON.TransformNode("modelRoot", scene);
+        const slowStop = new BABYLON.Animation(
+            "easeOut",
+            "rotation.y",
+            60,
+            BABYLON.Animation.ANIMATIONTYPE_FLOAT,
+            BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT
+        );
 
-            meshes.forEach(m => {
-                if (m.name !== "__root__") {
-                    m.parent = currentModel;
-                }
-            });
+        slowStop.setKeys([
+            { frame: 15, value: currentModel.rotation.y + Math.PI * 2 },
+            { frame: 40, value: currentModel.rotation.y + Math.PI * 2.2 }
+        ]);
 
-            // center
-            const bounds = currentModel.getHierarchyBoundingVectors(true);
-            const center = bounds.min.add(bounds.max).scale(0.5);
-            currentModel.position.copyFrom(center);
+        slowStop.setEasingFunction(easeOut);
 
-            // -----------------------
-            // 🔥 PHASE 2 — FAST ROTATION IN
-            // -----------------------
-            const fastSpin = new BABYLON.Animation(
-                "spinIn",
-                "rotation.y",
-                60,
-                BABYLON.Animation.ANIMATIONTYPE_FLOAT,
-                BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT
-            );
+        currentModel.animations = [fastSpin, slowStop];
 
-            fastSpin.setKeys([
-                { frame: 0, value: currentModel.rotation.y },
-                { frame: 15, value: currentModel.rotation.y + Math.PI * 2 }
-            ]);
-
-            // -----------------------
-            // 🔥 PHASE 3 — EASE OUT
-            // -----------------------
-            const slowStop = new BABYLON.Animation(
-                "easeOut",
-                "rotation.y",
-                60,
-                BABYLON.Animation.ANIMATIONTYPE_FLOAT,
-                BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT
-            );
-
-            slowStop.setKeys([
-                { frame: 15, value: currentModel.rotation.y + Math.PI * 2 },
-                { frame: 40, value: currentModel.rotation.y + Math.PI * 2.2 }
-            ]);
-
-            slowStop.setEasingFunction(easeOut);
-
-            currentModel.animations = [fastSpin, slowStop];
-
-            scene.beginAnimation(currentModel, 0, 40, false, 1, () => {
-                isMorphing = false;
-            });
-
+        scene.beginAnimation(currentModel, 0, 40, false, 1, () => {
+            isMorphing = false;
         });
 
-    });}
+    });
+    }
 
 return scene;
-};
+}
 
 scene = createScene();
 
@@ -385,5 +453,3 @@ engine.runRenderLoop(() => {
 window.addEventListener("resize", () => {
     engine.resize();
 });
-
-
