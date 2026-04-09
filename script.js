@@ -156,8 +156,8 @@ function createScene() {
         "https://raw.githubusercontent.com/dezz46/WebGl-assets/main/rightArrow.png"
     );
 
-    arrow.width = "120px";
-    arrow.height = "300px";
+    arrow.width = "40px";
+    arrow.height = "100px";
 
     // flip for left
     if (direction === "left") {
